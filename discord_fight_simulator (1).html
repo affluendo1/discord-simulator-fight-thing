@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Discord Fight Simulator</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background: linear-gradient(135deg, #001133 10%, #000022 100%);
+      background-attachment: fixed;
+      color: #fff;
+      padding: 50px;
+      text-align: center;
+    }
+    button {
+      padding: 20px 40px;
+      font-size: 22px;
+      background-color: #111;
+      color: #fff;
+      border: 2px solid #fff;
+      cursor: pointer;
+      margin: 20px;
+      border-radius: 8px;
+      transition: all 0.2s ease-in-out;
+    }
+    button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px #fff;
+    }
+    select, input {
+      padding: 15px;
+      margin: 15px;
+      font-size: 18px;
+      background-color: #000;
+      color: #fff;
+      border: 1px solid #fff;
+      border-radius: 5px;
+      width: 250px;
+    }
+    #log {
+      text-align: left;
+      margin-top: 40px;
+      white-space: pre-line;
+      background-color: #000;
+      padding: 30px;
+      border: 1px solid #fff;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.8em;
+      max-height: 600px;
+      overflow-y: auto;
+      border-radius: 8px;
+      color: #fff;
+    }
+    h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+    h2 {
+      font-size: 32px;
+      margin-top: 40px;
+      color: #aad;
+    }
+    #create-section, #fighter-selection {
+      margin-bottom: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Discord Fight Simulator</h1>
+  <h2>Create Your Own Fighter</h2>
+  <div id="create-section">
+    <p>You have 70 skill points to distribute between Power, Speed, and Luck.</p>
+    <input type="text" id="customName" placeholder="Fighter Name (e.g. meatball)" />
+    <input type="number" id="customPower" placeholder="Power (min 10)" min="10" max="70" />
+    <input type="number" id="customSpeed" placeholder="Speed (min 1)" min="1" max="70" />
+    <input type="number" id="customLuck" placeholder="Luck (min 0)" min="0" max="70" />
+    <br>
+    <label><input type="checkbox" id="randomEventsToggle"> Enable Random Events</label>
+    <br>
+    <button onclick="createCharacter()">Create Fighter</button>
+  </div>
+  <h2>Select Fighters</h2>
+  <div id="fighter-selection">
+    <label for="fighter1">Choose Fighter 1:</label>
+    <select id="fighter1"></select>
+    <br>
+    <label for="fighter2">Choose Fighter 2:</label>
+    <select id="fighter2"></select>
+  </div>
+  <button onclick="startFight()">FIGHT!</button>
+  <div id="log"></div>
+<script>
+function populateDropdowns() {
+  const fighter1Select = document.getElementById("fighter1");
+  const fighter2Select = document.getElementById("fighter2");
+  fighter1Select.innerHTML = "";
+  fighter2Select.innerHTML = "";
+  fighters.forEach(f => {
+    const label = `${f.name} (P:${f.power} S:${f.speed} L:${f.luck})`;
+    const option1 = new Option(label, f.name);
+    const option2 = new Option(label, f.name);
+    fighter1Select.add(option1);
+    fighter2Select.add(option2);
+  });
+}
+
+const fighters = [
+  { name: "jayden", power: 1000, speed: 1, luck: 0 },
+  { name: "ryan", power: 20, speed: 10, luck: 5 },
+  { name: "aliyah", power: 18, speed: 12, luck: 3 },
+  { name: "benny", power: 22, speed: 8, luck: 4 },
+  { name: "lina", power: 15, speed: 15, luck: 6 },
+  { name: "alex", power: 17, speed: 12, luck: 4 },
+  { name: "emmelyn", power: 16, speed: 11, luck: 5 },
+  { name: "alice", power: 19, speed: 9, luck: 6 },
+  { name: "moses", power: 21, speed: 7, luck: 3 },
+  { name: "harvey", power: 23, speed: 8, luck: 2 },
+  { name: "haydn", power: 20, speed: 10, luck: 5 },
+  { name: "thevvin", power: 18, speed: 14, luck: 3 }
+];
+
+function createCharacter() {
+  const name = document.getElementById("customName").value;
+  const power = parseInt(document.getElementById("customPower").value);
+  const speed = parseInt(document.getElementById("customSpeed").value);
+  const luck = parseInt(document.getElementById("customLuck").value);
+  if (!name || isNaN(power) || isNaN(speed) || isNaN(luck)) return;
+  if (power + speed + luck > 70) {
+    alert("You can only use up to 70 total skill points!");
+    return;
+  }
+  fighters.push({ name, power, speed, luck });
+  populateDropdowns();
+}
+
+function startFight() {
+  const f1Name = document.getElementById("fighter1").value;
+  const f2Name = document.getElementById("fighter2").value;
+  if (!f1Name || !f2Name || f1Name === f2Name) {
+    document.getElementById("log").innerText = "Please select two different fighters!";
+    return;
+  }
+
+  const f1 = fighters.find(f => f.name === f1Name);
+  const f2 = fighters.find(f => f.name === f2Name);
+  const p1 = { ...f1, health: 100 };
+  const p2 = { ...f2, health: 100 };
+
+  let attacker = p1.speed >= p2.speed ? p1 : p2;
+  let defender = attacker === p1 ? p2 : p1;
+
+  const log = [];
+  log.push(`${f1Name.toUpperCase()} VS ${f2Name.toUpperCase()}\n\n[Battle simulation begins... ⚔️]\n`);
+
+  const attackStyles = ["throws a spinning kick", "punches", "slaps", "dropkicks", "headbutts", "smacks", "roundhouse kicks"];
+
+  let round = 1;
+
+  while (p1.health > 0 && p2.health > 0) {
+    log.push(`-- Round ${round} --`);
+    const action = attackStyles[Math.floor(Math.random() * attackStyles.length)];
+    const dodgeChance = Math.min(defender.speed * 0.03, 0.4);
+    const parryChance = Math.min(defender.speed * 0.02, 0.25);
+
+    if (attacker.name === "jayden") {
+      if (Math.random() < 0.1) {
+        attacker.health -= 50;
+        log.push(`${attacker.name} MISSES his sit and crashes! 💥 Takes 50 damage. Current HP: ${attacker.health}`);
+      } else {
+        defender.health = 0;
+        log.push(`${attacker.name} sits on ${defender.name} with UNSTOPPABLE FORCE! 🪑💀`);
+      }
+    } else {
+      if (Math.random() < parryChance) {
+        log.push(`🛡️ WOW! ${defender.name} parries ${attacker.name}'s ${action} with incredible timing and counters!`);
+        attacker.health -= 5;
+        log.push(`${attacker.name} takes 5 damage! Now at ${attacker.health} HP.`);
+      } else if (Math.random() < dodgeChance) {
+        log.push(`🚨 WHOA! ${defender.name} dodges the ${action} from ${attacker.name} with prestige!`);
+      } else {
+        defender.health -= attacker.power;
+        log.push(`${attacker.name} ${action} ${defender.name}, dealing ${attacker.power} damage! 💥`);
+        log.push(`${defender.name} is now at ${Math.max(0, defender.health)} HP. ❤️`);
+      }
+    }
+
+    if (defender.health <= 0) {
+      log.push(`💀 FINAL BLOW! ${attacker.name.toUpperCase()} has defeated ${defender.name.toUpperCase()}! 🏆`);
+      break;
+    }
+
+    [attacker, defender] = [defender, attacker];
+    round++;
+    log.push("");
+  }
+
+  document.getElementById("log").innerText = log.join('\n');
+}
+
+populateDropdowns();
+</script>
+</body>
+</html>
