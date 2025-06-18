@@ -1,0 +1,1 @@
+its a discord fight simulator for my year 7 discord server so if somehow you manage to see this page and your not in my discord but still want to use it, then just ignore the premade characters and make your own character
